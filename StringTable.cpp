@@ -1,6 +1,6 @@
 #include "StringTable.h"
 
-int StringTable::add(const std::string name)
+std::shared_ptr<StringOperand> StringTable::add(const std::string name)
 {
 	std::vector<std::string>::iterator iter = _strings.begin();
 	int n = 0;
@@ -8,13 +8,15 @@ int StringTable::add(const std::string name)
 	{
 		if (*iter == name)
 		{
-			return n;
+			StringOperand tmp_ret = StringOperand(n, this);
+			return std::make_shared<StringOperand>(tmp_ret);
 		}
 		n++;
 		++iter;
 	}
 	_strings.push_back(name);
-	return (_strings.size() - 1);
+	StringOperand tmp_ret = StringOperand(_strings.size() - 1, this);
+	return std::make_shared<StringOperand>(tmp_ret);
 }
 
 const std::string& StringTable::operator [](const int index) const

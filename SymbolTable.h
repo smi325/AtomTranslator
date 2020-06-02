@@ -1,7 +1,9 @@
 #pragma once
+#include "Atoms.h"
 #include <vector>
 #include <string>
 #include <iostream>
+
 
 class SymbolTable
 {
@@ -11,7 +13,7 @@ public:
 		std::string _name;
 		bool operator == (const TableRecord& other) const;
 	};
-	int add(const std::string& name);
+	std::shared_ptr<MemoryOperand> add(const std::string& name);
 	const TableRecord& operator [](const int index) const;
 protected:
 	std::vector<TableRecord> _records;
