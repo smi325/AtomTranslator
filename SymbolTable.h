@@ -15,6 +15,7 @@ public:
 	};
 	std::shared_ptr<MemoryOperand> add(const std::string& name);
 	const TableRecord& operator [](const int index) const;
+	std::shared_ptr<MemoryOperand> alloc();
 protected:
 	std::vector<TableRecord> _records;
 	TableRecord error = { "error" };

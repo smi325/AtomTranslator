@@ -34,3 +34,9 @@ const SymbolTable::TableRecord& SymbolTable::operator [](const int index) const
 		return _records[index];
 	return error;
 }
+
+
+std::shared_ptr<MemoryOperand> SymbolTable::alloc()
+{
+	return this->add("temp" + std::to_string(_records.size()));
+}
