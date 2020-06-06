@@ -27,9 +27,9 @@ public:
 
 		bool operator == (const TableRecord& other) const;
 	};
-	std::shared_ptr<MemoryOperand> add(const std::string& name);
+	std::shared_ptr<MemoryOperand> add(const std::string& name, Scope scope);
 	const TableRecord& operator [](const int index) const;
-	std::shared_ptr<MemoryOperand> alloc();
+	std::shared_ptr<MemoryOperand> alloc(Scope scope);
 protected:
 	std::vector<TableRecord> _records;
 	TableRecord error = { "error" };

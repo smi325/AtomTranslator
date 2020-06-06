@@ -1,6 +1,6 @@
 #include "SymbolTable.h"
 
-std::shared_ptr<MemoryOperand> SymbolTable::add(const std::string& name)
+std::shared_ptr<MemoryOperand> SymbolTable::add(const std::string& name, Scope scope)
 {
 	std::vector < SymbolTable::TableRecord > ::iterator iter = _records.begin();
 	int n = 0;
@@ -15,7 +15,9 @@ std::shared_ptr<MemoryOperand> SymbolTable::add(const std::string& name)
 		n++;
 		++iter;
 	}
-	_records.push_back(SymbolTable::TableRecord{name});
+	auto push_tmp = SymbolTable::TableRecord{ name };
+	push_tmp._scope = scope;
+	_records.push_back(push_tmp);
 	MemoryOperand tmp_ret = MemoryOperand(_records.size() - 1, this);
 	return std::make_shared<MemoryOperand>(tmp_ret);
 }
@@ -36,7 +38,7 @@ const SymbolTable::TableRecord& SymbolTable::operator [](const int index) const
 }
 
 
-std::shared_ptr<MemoryOperand> SymbolTable::alloc()
+std::shared_ptr<MemoryOperand> SymbolTable::alloc(Scope scope)/*!!!!!!!!!!!!!!!*/
 {
-	return this->add("temp" + std::to_string(_records.size()));
+	return this->add("temp" + std::to_string(_records.size()), scope);
 }
