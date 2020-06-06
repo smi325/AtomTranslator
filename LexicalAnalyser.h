@@ -20,6 +20,7 @@ private:
 	std::string _str;
 
 public:
+	Token();
 	Token(LexemType type);
 	Token(int value);
 	Token(LexemType type, const std::string& str);
@@ -44,5 +45,8 @@ private:
 public:
 	Scanner(std::istream& stream);
 	Token getNextToken();
+	void ungetG();
+	bool _unget_check = false;
+	Token _last_token;
 
 };
