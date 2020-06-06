@@ -27,7 +27,23 @@ LabelOperand::LabelOperand(int labelID)
 
 std::string MemoryOperand::toString() const
 {
-	std::string tmp = std::to_string(_index) + " " + _SymbolTable->operator[](_index)._name;
+	std::string kind = "unknown";
+	if (_SymbolTable->operator[](_index)._kind == SymbolTable::TableRecord::RecordKind::var)
+		kind = "var";
+	if (_SymbolTable->operator[](_index)._kind == SymbolTable::TableRecord::RecordKind::func)
+		kind = "func";
+
+	std::string type = "unknown";
+	if (_SymbolTable->operator[](_index)._type == SymbolTable::TableRecord::RecordType::integer)
+		kind = "integer";
+	if (_SymbolTable->operator[](_index)._type == SymbolTable::TableRecord::RecordType::chr)
+		kind = "chr";
+	std::string name = _SymbolTable->operator[](_index)._name;
+	std::string len = std::to_string(_SymbolTable->operator[](_index)._len);
+	std::string init = std::to_string(_SymbolTable->operator[](_index)._init);
+	std::string scope = std::to_string(_SymbolTable->operator[](_index)._scope);
+	std::string offset = std::to_string(_SymbolTable->operator[](_index)._offset);
+	std::string tmp = std::to_string(_index) + " " + name + " " + kind + " " + type + " " + len + " " + init + " " + scope + " " + offset;
 	return tmp;
 }
 
@@ -141,5 +157,42 @@ std::string InAtom::toString() const
 std::string OutAtom::toString() const
 {
 	std::string tmp = "(OUT,,, " + _value->toString() + ")";
+	return tmp;
+}
+
+/*13.2*/
+
+CallAtom::CallAtom(std::shared_ptr<MemoryOperand> func, std::shared_ptr<MemoryOperand> res)
+{
+	_func = func;
+	_res = res;
+}
+
+RetAtom::RetAtom(std::shared_ptr<RValue> ret)
+{
+	_ret = ret;
+}
+
+ParamAtom::ParamAtom(std::shared_ptr<RValue> param)
+{
+	_param = param;
+}
+
+
+std::string CallAtom::toString() const
+{
+	std::string tmp = "(CALL, " + _func->toString() + ",," + _res->toString() + ")";
+	return tmp;
+}
+
+std::string RetAtom::toString() const
+{
+	std::string tmp = "(RET,,, " + _ret->toString() + ")";
+	return tmp;
+}
+
+std::string ParamAtom::toString() const
+{
+	std::string tmp = "(PARAM,,, " + _param->toString() + ")";
 	return tmp;
 }

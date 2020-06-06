@@ -144,3 +144,31 @@ public:
 private:
 	std::shared_ptr<Operand> _value;
 };
+
+class CallAtom : public Atom
+{
+public:
+	CallAtom(std::shared_ptr<MemoryOperand> func, std::shared_ptr<MemoryOperand> res);
+	std::string toString() const;
+private:
+	std::shared_ptr<MemoryOperand> _func;
+	std::shared_ptr<MemoryOperand> _res;
+};
+
+class RetAtom : public Atom
+{
+public:
+	RetAtom(std::shared_ptr<RValue> ret);
+	std::string toString() const;
+private:
+	std::shared_ptr<RValue> _ret;
+};
+
+class ParamAtom : public Atom
+{
+public:
+	ParamAtom(std::shared_ptr<RValue> param);
+	std::string toString() const;
+private:
+	std::shared_ptr<RValue> _param;
+};
