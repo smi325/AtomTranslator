@@ -343,7 +343,7 @@ std::shared_ptr<RValue> Translator::E1(Scope scope)
 		}
 		if ((_currentLexem.type() == LexemType::id))
 		{
-			auto q = _SymbolTable.add(_currentLexem.str(), scope);
+			auto q = _SymbolTable.addVar(_currentLexem.str(), scope, SymbolTable::TableRecord::RecordType::integer);
 			generateAtom(std::make_shared<BinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q), scope);
 			return q;
 		}
@@ -368,7 +368,7 @@ std::shared_ptr<MemoryOperand> Translator::E1_(Scope scope, std::string p)
 	/*n29*/
 	if ((_currentLexem.type() == LexemType::opinc))
 	{
-		auto s = _SymbolTable.add(p, scope);
+		auto s = _SymbolTable.addVar(p, scope, SymbolTable::TableRecord::RecordType::integer);
 		auto r = _SymbolTable.alloc(scope);
 		generateAtom(std::make_shared<UnaryOpAtom>("MOV", s, r), scope);
 		generateAtom(std::make_shared<BinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s), scope);
@@ -376,7 +376,7 @@ std::shared_ptr<MemoryOperand> Translator::E1_(Scope scope, std::string p)
 	}
 	/*n31*/
 	_scanner.ungetG();
-	auto q = _SymbolTable.add(p, scope);
+	auto q = _SymbolTable.addVar(p, scope, SymbolTable::TableRecord::RecordType::integer);
 	return q;
 }
 
