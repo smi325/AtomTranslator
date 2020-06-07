@@ -376,7 +376,243 @@ std::shared_ptr<MemoryOperand> Translator::E1_(Scope scope, std::string p)
 	}
 	/*n31*/
 	_scanner.ungetG();
-	auto q = _SymbolTable.addVar(p, scope, SymbolTable::TableRecord::RecordType::integer);
+	auto q = _SymbolTable.addVar(p, scope, SymbolTable::TableRecord::RecordType::integer); /*ЗАМЕНИТЬ НА checkVar!!!!!!!!*/
 	return q;
 }
 
+/*13.2*/
+
+bool Translator::DeclareStmt(Scope scope)
+{
+	/*n1*/
+	auto p = Type(scope);
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	if (_currentLexem.type() == LexemType::id)
+	{
+		DeclareStmt_(scope, p, _currentLexem.str());
+		return true;
+	}
+	syntaxError("Синтаксическая ошибка");
+	return false;
+}
+
+bool Translator::DeclareStmt_(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name)
+{
+	/*n2*/
+	if (scope > -1)
+	{
+		syntaxError("Function difinition inside function");
+	}
+
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	if (_currentLexem.type() == LexemType::lbracket)
+	{
+		auto scope_ = _SymbolTable.addFunc(name, type, 0)->index();
+		auto n = ParamList(scope_);
+		_SymbolTable[scope_]._len = n;
+		return true;
+	}
+	syntaxError("Синтаксическая ошибка");
+	return false;
+}
+
+bool Translator::DeclareStmt(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	/*n3*/
+	if (_currentLexem.type() == LexemType::opassign)
+	{
+		_currentLexem = _scanner.getNextToken();
+		if (_currentLexem.type() == LexemType::error)
+		{
+			lexicalError("Лексическая ошибка");
+		}
+		if (_currentLexem.type() == LexemType::num)
+		{
+			_SymbolTable.addVar(name, scope, type, _currentLexem.value());
+			DeclVarList_(scope, type);
+			return true;
+		}
+		syntaxError("Синтаксическая ошибка");
+	}
+	/*n4*/
+	_scanner.ungetG();
+	_SymbolTable.addVar(name, scope, type);
+	DeclVarList_(scope, type);
+	return true;
+}
+
+SymbolTable::TableRecord::RecordType Translator::Type(Scope scope)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	/*n5*/
+	if (_currentLexem.type() == LexemType::kwchar)
+	{
+		return SymbolTable::TableRecord::RecordType::chr;
+	}
+	/*n6*/
+	if (_currentLexem.type() == LexemType::kwint)
+	{
+		return SymbolTable::TableRecord::RecordType::integer;
+	}
+	syntaxError("Синтаксическая ошибка");
+	return SymbolTable::TableRecord::RecordType::unknown;
+}
+
+
+bool Translator::DeclVarList_(Scope scope, SymbolTable::TableRecord::RecordType type)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	/*n7*/
+	if (_currentLexem.type() == LexemType::comma)
+	{
+		_currentLexem = _scanner.getNextToken();
+		if (_currentLexem.type() == LexemType::error)
+		{
+			lexicalError("Лексическая ошибка");
+		}
+		if (_currentLexem.type() == LexemType::id)
+		{
+			auto name = _currentLexem.str();
+			InitVar(scope, type, name);
+			DeclVarList_(scope, type);
+			return true;
+		}
+		syntaxError("Синтаксическая ошибка");
+	}
+	/*n8*/
+	_scanner.ungetG();
+	return true;
+}
+
+bool Translator::InitVar(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	if (_currentLexem.type() == LexemType::opassign)
+	{
+		_currentLexem = _scanner.getNextToken();
+		if (_currentLexem.type() == LexemType::error)
+		{
+			lexicalError("Лексическая ошибка");
+		}
+		/*n9.1*/
+		if (_currentLexem.type() == LexemType::num)
+		{
+			_SymbolTable.addVar(name, scope, type, _currentLexem.value());
+			return true;
+		}
+		/*n9.2*/
+		if (_currentLexem.type() == LexemType::chr)
+		{
+			_SymbolTable.addVar(name, scope, type, _currentLexem.value());
+			return true;
+		}
+		syntaxError("Синтаксическая ошибка");
+	}
+	/*n10*/
+	_scanner.ungetG();
+	_SymbolTable.addVar(name, scope, type);
+	return true;
+}
+
+
+int Translator::ParamList(Scope scope)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	/*n11*/
+	if (_currentLexem.type() == LexemType::kwchar || _currentLexem.type() == LexemType::kwint)
+	{
+		_scanner.ungetG();
+		auto q = Type(scope);
+		_currentLexem = _scanner.getNextToken();
+		if (_currentLexem.type() == LexemType::error)
+		{
+			lexicalError("Лексическая ошибка");
+		}
+		if (_currentLexem.type() == LexemType::id)
+		{
+			auto name = _currentLexem.str();
+			_SymbolTable.addVar(name, scope, q);
+			auto s = ParamList_(scope);
+			return (s + 1);
+		}
+		syntaxError("Синтаксическая ошибка");
+	}
+	/*n12*/
+	_scanner.ungetG();
+	return 0;
+}
+
+int Translator::ParamList_(Scope scope)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	/*n13*/
+	if (_currentLexem.type() == LexemType::comma)
+	{
+		_currentLexem = _scanner.getNextToken();
+		if (_currentLexem.type() == LexemType::error)
+		{
+			lexicalError("Лексическая ошибка");
+		}
+		if (_currentLexem.type() == LexemType::kwchar || _currentLexem.type() == LexemType::kwint)
+		{
+			_scanner.ungetG();
+			auto q = Type(scope);
+			_currentLexem = _scanner.getNextToken();
+			if (_currentLexem.type() == LexemType::error)
+			{
+				lexicalError("Лексическая ошибка");
+			}
+			if (_currentLexem.type() == LexemType::id)
+			{
+				auto name = _currentLexem.str();
+				_SymbolTable.addVar(name, scope, q);
+				auto s = ParamList_(scope);
+				return (s + 1);
+			}
+			syntaxError("Синтаксическая ошибка");
+		}
+		syntaxError("Синтаксическая ошибка");
+	}
+	/*n14*/
+	_scanner.ungetG();
+	return 0;
+}
+
+bool Translator::StmtList(Scope scope)
+{
+	/*n16*/
+	return true;
+}

@@ -49,6 +49,15 @@ public:
 	std::shared_ptr<RValue> E1(Scope scope);
 	std::shared_ptr<MemoryOperand> E1_(Scope scope, std::string p);
 
+	SymbolTable::TableRecord::RecordType Type(Scope scope);
+	bool StmtList(Scope scope);
+	int ParamList(Scope scope);
+	int ParamList_(Scope scope);
+	bool InitVar(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name);
+	bool DeclVarList_(Scope scope, SymbolTable::TableRecord::RecordType type);
+	bool DeclareStmt(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name);
+	bool DeclareStmt(Scope scope);
+	bool DeclareStmt_(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name);
 protected:
 	std::map<Scope, std::vector<std::shared_ptr<Atom>>> _atoms;
 	StringTable _StringTable = StringTable();

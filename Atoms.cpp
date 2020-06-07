@@ -196,3 +196,9 @@ std::string ParamAtom::toString() const
 	std::string tmp = "(PARAM,,, " + _param->toString() + ")";
 	return tmp;
 }
+
+
+int MemoryOperand::index() const
+{
+	return _index;
+}

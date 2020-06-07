@@ -20,7 +20,7 @@ public:
 		RecordKind _kind = RecordKind::unknown;
 		RecordType _type = RecordType::unknown;
 
-		int _len = -1;
+		mutable int _len = -1;
 		int _init = 0;
 		Scope _scope = GlobalScope;
 		int _offset = -1;

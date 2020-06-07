@@ -25,6 +25,8 @@ class MemoryOperand : public RValue
 public:
 	MemoryOperand(int index, const SymbolTable* SymbolTable);
 	std::string toString() const;
+
+	int index() const; /*13.2*/
 protected:
 	int _index;
 	const SymbolTable* _SymbolTable;
