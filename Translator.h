@@ -55,9 +55,10 @@ public:
 	int ParamList_(Scope scope);
 	bool InitVar(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name);
 	bool DeclVarList_(Scope scope, SymbolTable::TableRecord::RecordType type);
-	bool DeclareStmt(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name);
 	bool DeclareStmt(Scope scope);
 	bool DeclareStmt_(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name);
+
+	bool Stmt(Scope scope);
 protected:
 	std::map<Scope, std::vector<std::shared_ptr<Atom>>> _atoms;
 	StringTable _StringTable = StringTable();

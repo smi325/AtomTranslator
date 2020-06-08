@@ -343,7 +343,7 @@ std::shared_ptr<RValue> Translator::E1(Scope scope)
 		}
 		if ((_currentLexem.type() == LexemType::id))
 		{
-			auto q = _SymbolTable.addVar(_currentLexem.str(), scope, SymbolTable::TableRecord::RecordType::integer);
+			auto q = _SymbolTable.checkVar(scope, _currentLexem.str());
 			generateAtom(std::make_shared<BinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q), scope);
 			return q;
 		}
@@ -368,7 +368,7 @@ std::shared_ptr<MemoryOperand> Translator::E1_(Scope scope, std::string p)
 	/*n29*/
 	if ((_currentLexem.type() == LexemType::opinc))
 	{
-		auto s = _SymbolTable.addVar(p, scope, SymbolTable::TableRecord::RecordType::integer);
+		auto s = _SymbolTable.checkVar(scope, p);
 		auto r = _SymbolTable.alloc(scope);
 		generateAtom(std::make_shared<UnaryOpAtom>("MOV", s, r), scope);
 		generateAtom(std::make_shared<BinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s), scope);
@@ -400,36 +400,54 @@ bool Translator::DeclareStmt(Scope scope)
 	return false;
 }
 
+
 bool Translator::DeclareStmt_(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name)
 {
-	/*n2*/
-	if (scope > -1)
-	{
-		syntaxError("Function difinition inside function");
-	}
-
 	_currentLexem = _scanner.getNextToken();
 	if (_currentLexem.type() == LexemType::error)
 	{
 		lexicalError("Лексическая ошибка");
 	}
-	if (_currentLexem.type() == LexemType::lbracket)
+	if (_currentLexem.type() == LexemType::lpar)
 	{
+		if (scope > -1)
+		{
+			syntaxError("Function difinition inside function");
+		}
 		auto scope_ = _SymbolTable.addFunc(name, type, 0)->index();
 		auto n = ParamList(scope_);
 		_SymbolTable[scope_]._len = n;
-		return true;
-	}
-	syntaxError("Синтаксическая ошибка");
-	return false;
-}
 
-bool Translator::DeclareStmt(Scope scope, SymbolTable::TableRecord::RecordType type, std::string name)
-{
-	_currentLexem = _scanner.getNextToken();
-	if (_currentLexem.type() == LexemType::error)
-	{
-		lexicalError("Лексическая ошибка");
+		_currentLexem = _scanner.getNextToken();
+		if (_currentLexem.type() == LexemType::error)
+		{
+			lexicalError("Лексическая ошибка");
+		}
+		if (_currentLexem.type() == LexemType::rpar)
+		{
+			_currentLexem = _scanner.getNextToken();
+			if (_currentLexem.type() == LexemType::error)
+			{
+				lexicalError("Лексическая ошибка");
+			}
+			if (_currentLexem.type() == LexemType::lbrace)
+			{
+				StmtList(scope_);
+				_currentLexem = _scanner.getNextToken();
+				if (_currentLexem.type() == LexemType::error)
+				{
+					lexicalError("Лексическая ошибка");
+				}
+				if (_currentLexem.type() == LexemType::rbrace)
+				{
+					generateAtom(std::make_shared<RetAtom>(std::make_shared<NumberOperand>('0')), scope_);
+					return true;
+				}
+				syntaxError("Синтаксическая ошибка");
+			}
+			syntaxError("Синтаксическая ошибка");
+		}
+		syntaxError("Синтаксическая ошибка");
 	}
 	/*n3*/
 	if (_currentLexem.type() == LexemType::opassign)
@@ -615,4 +633,28 @@ bool Translator::StmtList(Scope scope)
 {
 	/*n16*/
 	return true;
+}
+
+bool Translator::Stmt(Scope scope)
+{
+	_currentLexem = _scanner.getNextToken();
+	if (_currentLexem.type() == LexemType::error)
+	{
+		lexicalError("Лексическая ошибка");
+	}
+	/*n17*/
+	if (_currentLexem.type() == LexemType::num || _currentLexem.type() == LexemType::chr)
+	{
+		_scanner.ungetG();
+		DeclareStmt(scope);
+		return true;
+	}
+	if (scope == -1)
+		syntaxError("Operator should be inside function");
+	/*n18*/
+	if (_currentLexem.type() == LexemType::id)
+	{
+	
+	}
+
 }

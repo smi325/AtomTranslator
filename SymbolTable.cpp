@@ -40,7 +40,8 @@ const SymbolTable::TableRecord& SymbolTable::operator [](const int index) const
 
 std::shared_ptr<MemoryOperand> SymbolTable::alloc(Scope scope)/*!!!!!!!!!!!!!!!*/
 {
-	return this->add("temp" + std::to_string(_records.size()), scope);
+	/*return this->add("temp" + std::to_string(_records.size()), scope);*/
+	return this->addVar("[temp]" + std::to_string(_records.size()), scope, SymbolTable::TableRecord::RecordType::integer);
 }
 
 
